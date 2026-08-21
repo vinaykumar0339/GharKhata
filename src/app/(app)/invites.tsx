@@ -9,11 +9,11 @@ import { useApp } from '@/providers/app-provider';
 import type { ProjectInvite } from '@/types/domain';
 
 export default function Invites() {
-  const { user } = useApp(); const [invites, setInvites] = useState<ProjectInvite[]>([]); const [busy, setBusy] = useState<string>();
+  const { user, profile } = useApp(); const [invites, setInvites] = useState<ProjectInvite[]>([]); const [busy, setBusy] = useState<string>();
   useEffect(() => user?.email ? inviteRepository.watchForEmail(user.email, setInvites) : undefined, [user?.email]);
   const accept = async (invite: ProjectInvite) => {
     if (!user) return; setBusy(invite.id);
-    try { await inviteRepository.accept(user.uid, invite); await profileRepository.selectProject(user.uid, invite.projectId); Alert.alert('Project joined', `You can now collaborate on ${invite.projectName}.`); }
+    try { await inviteRepository.accept(user.uid, profile?.displayName || user.displayName || 'Project member', invite); await profileRepository.selectProject(user.uid, invite.projectId); Alert.alert('Project joined', `You can now collaborate on ${invite.projectName}.`); }
     catch (error) { Alert.alert('Could not join project', friendlyError(error, 'Please try again.')); } finally { setBusy(undefined); }
   };
   const decline = async (invite: ProjectInvite) => {

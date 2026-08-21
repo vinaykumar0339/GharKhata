@@ -13,7 +13,8 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow create: if signedIn() && userId == request.auth.uid;
-      allow read, update, delete: if signedIn() && userId == request.auth.uid;
+      allow read: if signedIn();
+      allow update, delete: if signedIn() && userId == request.auth.uid;
     }
 
     match /projects/{projectId} {
@@ -41,6 +42,23 @@ service cloud.firestore {
         && acceptedInvite(projectId).data.status == 'accepted'
         && acceptedInvite(projectId).data.acceptedBy == request.auth.uid
         && request.resource.data.memberRoles[request.auth.uid] == acceptedInvite(projectId).data.role;
+
+      match /members/{userId} {
+        allow read: if isMember(projectId);
+        allow create: if signedIn()
+          && userId == request.auth.uid
+          && request.resource.data.userId == userId
+          && request.resource.data.displayName is string
+          && request.resource.data.keys().hasOnly(['userId', 'displayName', 'updatedAt'])
+          && request.auth.uid in getAfter(/databases/$(database)/documents/projects/$(projectId)).data.memberIds;
+        allow update: if signedIn()
+          && userId == request.auth.uid
+          && isMember(projectId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.displayName is string
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'updatedAt']);
+        allow delete: if isAdmin(projectId);
+      }
     }
 
     match /projectInvites/{inviteId} {

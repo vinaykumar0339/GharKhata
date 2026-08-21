@@ -19,7 +19,7 @@ export const inviteRepository = {
   watchForProject(projectId: string, callback: (items: ProjectInvite[]) => void): Unsubscribe {
     return onSnapshot(query(collection(db, 'projectInvites'), where('projectId', '==', projectId)), (snapshot) => callback(snapshot.docs.map((item) => ({ id: item.id, ...item.data() } as ProjectInvite))), () => callback([]));
   },
-  async accept(userId: string, invite: ProjectInvite) {
+  async accept(userId: string, displayName: string, invite: ProjectInvite) {
     await runTransaction(db, async (transaction) => {
       const inviteRef = doc(db, 'projectInvites', invite.id); const projectRef = doc(db, 'projects', invite.projectId);
       const inviteSnapshot = await transaction.get(inviteRef);
@@ -27,6 +27,7 @@ export const inviteRepository = {
       const current = inviteSnapshot.data() as ProjectInvite;
       transaction.update(inviteRef, { status: 'accepted', acceptedBy: userId, updatedAt: now() });
       transaction.update(projectRef, { memberIds: arrayUnion(userId), [`memberRoles.${userId}`]: current.role, updatedAt: now() });
+      transaction.set(doc(projectRef, 'members', userId), { userId, displayName, updatedAt: now() });
     });
   },
   decline: (id: string) => updateDoc(doc(db, 'projectInvites', id), { status: 'declined', updatedAt: now() }),
@@ -34,6 +35,7 @@ export const inviteRepository = {
   async removeMember(projectId: string, memberIds: string[], memberRoles: Record<string, ProjectRole>, userId: string, acceptedInviteIds: string[]) {
     const batch = writeBatch(db);
     batch.update(doc(db, 'projects', projectId), { memberIds: memberIds.filter((id) => id !== userId), memberRoles: Object.fromEntries(Object.entries(memberRoles).filter(([id]) => id !== userId)), updatedAt: now() });
+    batch.delete(doc(db, 'projects', projectId, 'members', userId));
     acceptedInviteIds.forEach((id) => batch.delete(doc(db, 'projectInvites', id)));
     await batch.commit();
   },

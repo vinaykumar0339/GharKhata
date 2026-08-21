@@ -32,6 +32,12 @@ export interface Project {
   updatedByName?: string;
 }
 
+export interface ProjectMember {
+  userId: string;
+  displayName: string;
+  updatedAt: string;
+}
+
 export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymentMethods' | 'paymentStatuses';
 
 export interface MasterItem {

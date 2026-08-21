@@ -5,6 +5,7 @@ import { colors } from '@/constants/design';
 import { friendlyError } from '@/lib/errors';
 import { authRepository } from '@/repositories/auth-repository';
 import { profileRepository } from '@/repositories/profile-repository';
+import { projectMemberRepository } from '@/repositories/project-member-repository';
 import { useApp } from '@/providers/app-provider';
 
 export default function ProfileScreen() {
@@ -22,6 +23,7 @@ export default function ProfileScreen() {
     try {
       await authRepository.updateDisplayName(name);
       await profileRepository.displayName(user.uid, name);
+      await projectMemberRepository.syncDisplayName(user.uid, name);
       Alert.alert('Profile updated', 'Your name will be used for new project activity.');
     } catch (error) {
       Alert.alert('Could not update profile', friendlyError(error, 'Please try again.'));
