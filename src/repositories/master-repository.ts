@@ -4,7 +4,7 @@ import { createOwned, listenOwned } from '@/repositories/firestore';
 import type { Expense, MasterItem, MasterType } from '@/types/domain';
 
 const defaults: Record<MasterType, string[]> = {
-  categories: ['Civil', 'Cement', 'Steel', 'Bricks', 'Sand', 'Aggregate', 'Electrical', 'Plumbing', 'Tiles', 'Doors & Windows', 'Woodwork', 'Painting', 'Kitchen', 'Interior', 'Labour', 'Architect', 'Engineer', 'Transportation', 'Other'],
+  categories: ['Civil', 'Cement', 'Steel', 'Bricks', 'Sand', 'Aggregate', 'Electrical', 'Plumbing', 'Tiles', 'Doors & Windows', 'Woodwork', 'Painting', 'Kitchen', 'Interior', 'Labour', 'Architect', 'Engineer', 'Approvals', 'Transportation', 'Other'],
   stages: ['Planning', 'Foundation', 'Basement', 'Structure', 'Brick Work', 'Plastering', 'Electrical', 'Plumbing', 'Flooring', 'Doors & Windows', 'Painting', 'Kitchen', 'Interior', 'External Work', 'Completion', 'Other'],
   vendors: [], units: ['Bag', 'Kg', 'Ton', 'Piece', 'Sq Ft', 'Sq M', 'Cft', 'Sq Yd', 'Litre', 'Meter', 'Day', 'Hour', 'Load', 'Trip', 'Other'],
   paymentMethods: ['Cash', 'UPI', 'Bank Transfer', 'Credit Card', 'Debit Card', 'Cheque', 'Loan', 'Other'], paymentStatuses: ['Paid', 'Pending', 'Partially Paid', 'Advance'],
