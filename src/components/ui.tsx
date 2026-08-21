@@ -25,6 +25,13 @@ export function Selector({ label, value, options, placeholder = 'Select', onChan
   </View>;
 }
 export function Header({ title, subtitle, right }: { title: string; subtitle?: string; right?: React.ReactNode }) { return <View style={styles.header}><View><Text style={styles.headerTitle}>{title}</Text>{subtitle ? <Text style={styles.headerSubtitle}>{subtitle}</Text> : null}</View>{right}</View>; }
+export function AuditText({ createdByName, updatedByName }: { createdByName?: string; updatedByName?: string }) {
+  if (!createdByName && !updatedByName) return null;
+  const text = createdByName && updatedByName && createdByName !== updatedByName
+    ? `Added by ${createdByName} · Edited by ${updatedByName}`
+    : createdByName ? `Added by ${createdByName}` : `Last updated by ${updatedByName}`;
+  return <Text style={styles.audit}>{text}</Text>;
+}
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.canvas }, scroll: { flexGrow: 1 }, screenContent: { flex: 1, padding: 20, gap: 18, width: '100%', maxWidth: 720, alignSelf: 'center' },
@@ -37,4 +44,5 @@ const styles = StyleSheet.create({
   selector: { minHeight: 50, backgroundColor: colors.surface, borderColor: colors.line, borderWidth: 1, borderRadius: 14, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, selectorText: { fontSize: 16, color: colors.ink }, placeholder: { fontSize: 16, color: '#9AA59E' }, chevron: { fontSize: 18, color: colors.forest },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(17, 31, 23, .4)', justifyContent: 'flex-end' }, sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, maxHeight: '75%', minHeight: 280 }, sheetHandle: { height: 4, borderRadius: 2, width: 42, backgroundColor: '#CBD4CD', alignSelf: 'center', marginBottom: 16 }, sheetTitle: { fontSize: 20, fontWeight: '800', color: colors.ink, marginBottom: 10 }, option: { minHeight: 54, borderBottomWidth: 1, borderBottomColor: colors.line, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, optionText: { fontSize: 16, color: colors.ink }, selected: { fontWeight: '900', color: colors.forest, fontSize: 18 }, emptyList: { color: colors.muted, marginTop: 20, textAlign: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }, headerTitle: { color: colors.ink, fontSize: 29, fontWeight: '900', letterSpacing: -.7 }, headerSubtitle: { color: colors.muted, fontSize: 14, marginTop: 3 },
+  audit: { color: colors.muted, fontSize: 12, lineHeight: 17, marginTop: 7 },
 });

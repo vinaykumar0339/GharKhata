@@ -24,8 +24,9 @@ export default function BudgetForm() {
     setSaving(true);
     try {
       const categoryBudgets = Object.entries(values).filter(([, amount]) => Number(amount) > 0).map(([categoryId, amount]) => ({ categoryId, amount: Number(amount) }));
-      await budgetRepository.save(user.uid, project.id, Number(total), categoryBudgets);
-      await projectRepository.update(user.uid, project.id, { totalBudget: Number(total) });
+      const actorName = profile?.displayName || user.displayName || 'Project admin';
+      await budgetRepository.save(user.uid, actorName, project.id, Number(total), categoryBudgets);
+      await projectRepository.update(user.uid, actorName, project.id, { totalBudget: Number(total) });
       router.back();
     } catch { Alert.alert('Could not save budget', 'Please try again.'); } finally { setSaving(false); }
   };

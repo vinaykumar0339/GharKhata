@@ -7,5 +7,6 @@ export const profileRepository = {
   async create(profile: Omit<Profile, 'id'>) { await setDoc(doc(db, 'users', profile.email ? profile.email : crypto.randomUUID()), profile); },
   async ensure(userId: string, email: string, displayName: string) { await setDoc(doc(db, 'users', userId), { email, displayName, currency: 'INR', createdAt: new Date().toISOString() }, { merge: true }); },
   currency: (userId: string, currency: CurrencyCode) => updateDoc(doc(db, 'users', userId), { currency }),
+  displayName: (userId: string, displayName: string) => updateDoc(doc(db, 'users', userId), { displayName: displayName.trim() }),
   selectProject: (userId: string, selectedProjectId: string) => updateDoc(doc(db, 'users', userId), { selectedProjectId }),
 };

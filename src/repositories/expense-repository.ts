@@ -22,7 +22,7 @@ export const expenseRepository = {
     return listenOwned<Expense>('expenses', userId, [where('projectId', '==', projectId), orderBy('date', 'desc')], (items) => callback(applyFilters(items, filters)), onError, false);
   },
   async get(_userId: string, id: string) { const snapshot = await getDoc(doc(db, 'expenses', id)); return snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as Expense) : undefined; },
-  create(userId: string, input: Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy'>) { return createOwned<Expense>('expenses', { ...input, ownerId: userId, createdBy: userId }); },
-  update(_userId: string, id: string, input: Partial<Expense>) { return updateDoc(doc(db, 'expenses', id), { ...input, updatedAt: new Date().toISOString() }); },
+  create(userId: string, actorName: string, input: Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdByName' | 'updatedBy' | 'updatedByName'>) { return createOwned<Expense>('expenses', { ...input, ownerId: userId, createdBy: userId, createdByName: actorName, updatedBy: userId, updatedByName: actorName }); },
+  update(userId: string, actorName: string, id: string, input: Partial<Expense>) { return updateDoc(doc(db, 'expenses', id), { ...input, updatedBy: userId, updatedByName: actorName, updatedAt: new Date().toISOString() }); },
   delete: (_userId: string, expense: Expense) => deleteDoc(doc(db, 'expenses', expense.id)),
 };

@@ -14,6 +14,7 @@ export interface Profile {
 export interface Project {
   id: string;
   ownerId: string;
+  ownerName?: string;
   name: string;
   description: string;
   houseType: string;
@@ -27,6 +28,8 @@ export interface Project {
   memberRoles: Record<string, ProjectRole>;
   createdAt: string;
   updatedAt: string;
+  updatedBy?: string;
+  updatedByName?: string;
 }
 
 export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymentMethods' | 'paymentStatuses';
@@ -34,6 +37,10 @@ export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymen
 export interface MasterItem {
   id: string;
   ownerId: string;
+  createdBy?: string;
+  createdByName?: string;
+  updatedBy?: string;
+  updatedByName?: string;
   projectId: string;
   name: string;
   type: MasterType;
@@ -45,6 +52,9 @@ export interface Expense {
   id: string;
   ownerId: string;
   createdBy: string;
+  createdByName?: string;
+  updatedBy?: string;
+  updatedByName?: string;
   projectId: string;
   date: string;
   stageId: string;
@@ -74,6 +84,8 @@ export interface Budget {
   projectId: string;
   totalBudget: number;
   categoryBudgets: CategoryBudget[];
+  updatedBy?: string;
+  updatedByName?: string;
   updatedAt: string;
 }
 

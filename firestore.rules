@@ -24,14 +24,14 @@ service cloud.firestore {
         && request.resource.data.memberIds[0] == request.auth.uid
         && request.resource.data.memberRoles[request.auth.uid] == 'admin';
       allow delete: if isOwner(resource.data);
-      allow update: if isOwner(resource.data) && (resource.data.status == 'active' || (request.resource.data.status == 'active' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])));
+      allow update: if isOwner(resource.data) && (resource.data.status == 'active' || (request.resource.data.status == 'active' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedBy', 'updatedByName', 'updatedAt'])));
       allow update: if isAdmin(projectId)
-        && (resource.data.status == 'active' || (request.resource.data.status == 'active' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])))
+        && (resource.data.status == 'active' || (request.resource.data.status == 'active' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedBy', 'updatedByName', 'updatedAt'])))
         && request.resource.data.ownerId == resource.data.ownerId
         && resource.data.ownerId in request.resource.data.memberIds
         && request.resource.data.memberRoles[resource.data.ownerId] == 'admin'
         && request.resource.data.memberIds.toSet().difference(resource.data.memberIds.toSet()).size() == 0
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'description', 'houseType', 'location', 'totalBudget', 'currency', 'startDate', 'expectedCompletionDate', 'status', 'memberIds', 'memberRoles', 'updatedAt']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'description', 'houseType', 'location', 'totalBudget', 'currency', 'startDate', 'expectedCompletionDate', 'status', 'memberIds', 'memberRoles', 'updatedBy', 'updatedByName', 'updatedAt']);
       allow update: if signedIn()
         && resource.data.status == 'active'
         && !(request.auth.uid in resource.data.memberIds)

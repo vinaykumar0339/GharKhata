@@ -32,8 +32,9 @@ export default function ExpenseForm() {
     const nextErrors = validateExpense(draft); setErrors(nextErrors); if (Object.keys(nextErrors).length) return;
     setSaving(true);
     try {
-      if (id) await expenseRepository.update(user.uid, id, draft);
-      else await expenseRepository.create(user.uid, draft as Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy'>);
+      const actorName = profile?.displayName || user.displayName || 'Project member';
+      if (id) await expenseRepository.update(user.uid, actorName, id, draft);
+      else await expenseRepository.create(user.uid, actorName, draft as Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdByName' | 'updatedBy' | 'updatedByName'>);
       if (another) { setForm({ projectId: form.projectId, date: today(), item: '', description: '', notes: '' }); setQuantityText(''); setRateText(''); setAmountText(''); setErrors({}); Alert.alert('Saved', 'Ready for the next expense.'); } else router.back();
     } catch (error) { Alert.alert('Unable to save expense', friendlyError(error, 'Please check your connection and try again.')); } finally { setSaving(false); }
   };
