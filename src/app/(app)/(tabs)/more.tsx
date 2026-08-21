@@ -1,0 +1,21 @@
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button, Card, Header, Pill, Screen, SectionTitle } from '@/components/ui';
+import { colors } from '@/constants/design';
+import { CURRENCIES } from '@/lib/format';
+import { authRepository } from '@/repositories/auth-repository';
+import { inviteRepository } from '@/repositories/invite-repository';
+import { useApp } from '@/providers/app-provider';
+import type { ProjectInvite } from '@/types/domain';
+
+const items = [{ label: 'Projects', detail: 'Create, select and archive projects', route: '/(app)/projects' }, { label: 'Project members', detail: 'Invite collaborators and assign roles', route: '/(app)/members' }, { label: 'Reports', detail: 'Summaries and spending insights', route: '/(app)/reports' }, { label: 'Categories', detail: 'Manage expense categories', route: '/(app)/masters/categories' }, { label: 'Stages', detail: 'Manage construction stages', route: '/(app)/masters/stages' }, { label: 'Vendors', detail: 'Manage suppliers and contractors', route: '/(app)/masters/vendors' }, { label: 'Units', detail: 'Manage quantity units', route: '/(app)/masters/units' }, { label: 'Payment methods', detail: 'Cash, UPI, transfer and more', route: '/(app)/masters/paymentMethods' }, { label: 'Payment statuses', detail: 'Paid, pending and partial', route: '/(app)/masters/paymentStatuses' }];
+
+export default function More() {
+  const { user, profile, currency, setCurrency } = useApp(); const [invites, setInvites] = useState<ProjectInvite[]>([]);
+  useEffect(() => user?.email ? inviteRepository.watchForEmail(user.email, setInvites) : undefined, [user?.email]);
+  const changeCurrency = () => Alert.alert('Change currency?', 'Currency changes will not perform currency conversion.', [{ text: 'Cancel', style: 'cancel' }, { text: currency === 'INR' ? 'Use USD' : 'Use INR', onPress: () => setCurrency(currency === 'INR' ? 'USD' : 'INR') }]);
+  const logout = () => Alert.alert('Log out?', 'You can sign back in anytime.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Log out', style: 'destructive', onPress: () => authRepository.logout() }]);
+  return <Screen><Header title="More" subtitle={profile?.displayName || 'Your account'} /><SectionTitle title="Settings" /><Card style={styles.menu}><Pressable onPress={changeCurrency} style={styles.item}><View><Text style={styles.label}>Currency</Text><Text style={styles.detail}>{CURRENCIES[currency].flag} {currency} — {CURRENCIES[currency].name}</Text></View><Text style={styles.arrow}>›</Text></Pressable></Card><SectionTitle title="Manage" /><Card style={styles.menu}><Pressable onPress={() => router.push('/(app)/invites')} style={styles.item}><View style={styles.itemText}><Text style={styles.label}>Invitations</Text><Text style={styles.detail}>{invites.length ? `${invites.length} project invitation${invites.length === 1 ? '' : 's'} waiting` : 'Projects shared with you'}</Text></View>{invites.length ? <Pill tone="amber" style={styles.inviteBadge}>{invites.length}</Pill> : null}<Text style={styles.arrow}>›</Text></Pressable>{items.map((item) => <Pressable key={item.label} onPress={() => router.push(item.route as never)} style={styles.item}><View style={styles.itemText}><Text style={styles.label}>{item.label}</Text><Text style={styles.detail}>{item.detail}</Text></View><Text style={styles.arrow}>›</Text></Pressable>)}</Card><Button variant="ghost" onPress={logout}>Log out</Button><Text style={styles.version}>GharKhata · Built for every brick and bill</Text></Screen>;
+}
+const styles = StyleSheet.create({ menu: { paddingVertical: 0 }, item: { minHeight: 65, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: colors.line }, itemText: { flex: 1 }, label: { color: colors.ink, fontSize: 15, fontWeight: '900' }, detail: { color: colors.muted, fontSize: 12, marginTop: 3 }, inviteBadge: { alignSelf: 'center' }, arrow: { color: colors.forest, fontSize: 28, marginLeft: 12 }, version: { color: colors.muted, fontSize: 12, textAlign: 'center', marginTop: 4 } });

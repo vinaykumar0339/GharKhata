@@ -1,0 +1,20 @@
+{
+  "indexes": [
+    { "collectionGroup": "projects", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "memberIds", "arrayConfig": "CONTAINS" }, { "fieldPath": "updatedAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "categories", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "stages", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "vendors", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "units", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "paymentMethods", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "paymentStatuses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "categoryId", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "stageId", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "vendorId", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "unitId", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "paidById", "order": "ASCENDING" }] },
+    { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "paymentStatusId", "order": "ASCENDING" }] },
+    { "collectionGroup": "projectInvites", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "invitedEmail", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }] }
+  ],
+  "fieldOverrides": []
+}
