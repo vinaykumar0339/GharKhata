@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button, EmptyState, Field, Header, Screen, Selector } from '@/components/ui';
 import { calculateAmount, today } from '@/lib/format';
 import { friendlyError } from '@/lib/errors';
@@ -12,6 +13,11 @@ import type { Expense } from '@/types/domain';
 
 const decimalValue = (value: string) => value && value !== '.' ? Number(value) : undefined;
 const isDecimalDraft = (value: string) => /^\d*(?:\.\d*)?$/.test(value);
+const dateFromString = (value?: string) => {
+  const [year, month, day] = (value || today()).split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+const dateToString = (value: Date) => [value.getFullYear(), String(value.getMonth() + 1).padStart(2, '0'), String(value.getDate()).padStart(2, '0')].join('-');
 
 export default function ExpenseForm() {
   const { id } = useLocalSearchParams<{ id?: string }>(); const { user, profile } = useApp();
@@ -20,7 +26,7 @@ export default function ExpenseForm() {
   const activeProject = projects.find((project) => project.id === form.projectId) ?? selected;
   const categories = useMaster(form.projectId, 'categories'); const stages = useMaster(form.projectId, 'stages'); const units = useMaster(form.projectId, 'units');
   const paidBy = useMaster(form.projectId, 'paymentMethods'); const statuses = useMaster(form.projectId, 'paymentStatuses'); const vendors = useMaster(form.projectId, 'vendors');
-  const [errors, setErrors] = useState<Record<string, string>>({}); const [loading, setLoading] = useState(Boolean(id)); const [saving, setSaving] = useState(false); const [quantityText, setQuantityText] = useState(''); const [rateText, setRateText] = useState(''); const [amountText, setAmountText] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({}); const [loading, setLoading] = useState(Boolean(id)); const [saving, setSaving] = useState(false); const [showDatePicker, setShowDatePicker] = useState(false); const [quantityText, setQuantityText] = useState(''); const [rateText, setRateText] = useState(''); const [amountText, setAmountText] = useState('');
   const canEdit = Boolean(activeProject && activeProject.status === 'active' && user && (activeProject.ownerId === user.uid || ['admin', 'editor'].includes(activeProject.memberRoles[user.uid])));
   useEffect(() => { if (selected && !form.projectId) setForm((current) => ({ ...current, projectId: selected.id })); }, [selected?.id]);
   useEffect(() => { if (!id || !user) return; expenseRepository.get(user.uid, id).then((expense) => { if (expense) { setForm(expense); setQuantityText(expense.quantity?.toString() ?? ''); setRateText(expense.rate?.toString() ?? ''); setAmountText(expense.amount?.toString() ?? ''); } setLoading(false); }); }, [id, user?.uid]);
@@ -42,7 +48,7 @@ export default function ExpenseForm() {
   if (!activeProject) return <Screen><EmptyState title="No project selected" body="Choose a project before adding an expense." /></Screen>;
   if (!canEdit) return <Screen><Header title="Expenses" /><EmptyState title={activeProject.status === 'archived' ? 'Project archived' : 'View-only access'} body={activeProject.status === 'archived' ? 'This project is read-only until an admin reactivates it.' : 'Your role can view expenses but cannot create or edit them.'} /></Screen>;
   return <Screen><Header title={id ? 'Edit expense' : 'Add expense'} subtitle="The essentials first — details when you have them." />
-    <Field label="Date (YYYY-MM-DD)" value={form.date} onChangeText={(value) => set('date', value)} error={errors.date} placeholder="2026-08-21" />
+    <View style={styles.dateField}><Text style={styles.dateLabel}>Date</Text><Pressable onPress={() => setShowDatePicker(true)} style={[styles.dateInput, errors.date && styles.dateInputError]}><Text style={styles.dateValue}>{form.date}</Text><Text style={styles.dateAction}>Change</Text></Pressable>{errors.date ? <Text style={styles.dateError}>{errors.date}</Text> : null}{showDatePicker ? <DateTimePicker value={dateFromString(form.date)} mode="date" display={Platform.OS === 'ios' ? 'spinner' : 'default'} onChange={(event, value) => { if (Platform.OS !== 'ios') setShowDatePicker(false); if (event.type === 'set' && value) set('date', dateToString(value)); }} /> : null}</View>
     <Selector label="Stage" value={form.stageId} options={stages} onChange={(value) => set('stageId', value)} error={errors.stageId} />
     <Selector label="Category" value={form.categoryId} options={categories} onChange={(value) => set('categoryId', value)} error={errors.categoryId} />
     <Field label="What did you buy or pay for?" value={form.item} onChangeText={(value) => set('item', value)} error={errors.item} placeholder="e.g. ACC cement" />
@@ -62,4 +68,4 @@ export default function ExpenseForm() {
     {!id ? <Button variant="secondary" disabled={saving} onPress={() => save(true)}>Save & add another</Button> : null}
   </Screen>;
 }
-const styles = StyleSheet.create({ measurements: { gap: 12 }, measurementPair: { flexDirection: 'row', gap: 12 }, measurementColumn: { flex: 1 }, notes: { minHeight: 88, paddingTop: 13, textAlignVertical: 'top' } });
+const styles = StyleSheet.create({ dateField: { gap: 7 }, dateLabel: { color: '#193126', fontWeight: '700', fontSize: 13 }, dateInput: { backgroundColor: 'white', borderColor: '#DCE5DE', borderWidth: 1, minHeight: 50, borderRadius: 14, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, dateInputError: { borderColor: '#E7725B' }, dateValue: { color: '#193126', fontSize: 16 }, dateAction: { color: '#1E6B47', fontWeight: '800', fontSize: 13 }, dateError: { color: '#E7725B', fontSize: 12 }, measurements: { gap: 12 }, measurementPair: { flexDirection: 'row', gap: 12 }, measurementColumn: { flex: 1 }, notes: { minHeight: 88, paddingTop: 13, textAlignVertical: 'top' } });

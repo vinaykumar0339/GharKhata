@@ -29,3 +29,15 @@ export function monthTotal(expenses: Expense[], monthOffset = 0) {
   const key = target.toISOString().slice(0, 7);
   return expenses.filter((expense) => expense.date.startsWith(key)).reduce((sum, expense) => sum + expense.amount, 0);
 }
+
+export function monthlyTotals(expenses: Expense[], months = 6, reference = new Date()) {
+  return Array.from({ length: months }, (_, index) => {
+    const date = new Date(reference.getFullYear(), reference.getMonth() - (months - index - 1), 1);
+    const key = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0')].join('-');
+    return {
+      key,
+      label: date.toLocaleDateString('en-IN', { month: 'short' }),
+      amount: expenses.filter((expense) => expense.date.startsWith(key)).reduce((sum, expense) => sum + expense.amount, 0),
+    };
+  });
+}
