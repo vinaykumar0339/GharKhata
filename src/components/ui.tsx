@@ -1,12 +1,16 @@
 import { type PropsWithChildren, type ReactNode, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, shadow } from '@/constants/design';
 import { useProfiles } from '@/hooks/use-project-data';
 
 export function Screen({ children, scroll = true, style }: PropsWithChildren<{ scroll?: boolean; style?: ViewStyle }>) {
   const content = <View style={[styles.screenContent, style]}>{children}</View>;
-  return <SafeAreaView style={styles.safe}>{scroll ? <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>{content}</ScrollView> : content}</SafeAreaView>;
+  return <SafeAreaView style={styles.safe}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardAvoidingView}>
+      {scroll ? <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>{content}</ScrollView> : content}
+    </KeyboardAvoidingView>
+  </SafeAreaView>;
 }
 export function Card({ children, style }: PropsWithChildren<{ style?: ViewStyle }>) { return <View style={[styles.card, style]}>{children}</View>; }
 export function Button({ children, onPress, variant = 'primary', loading, disabled, style }: PropsWithChildren<{ onPress: () => void; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; loading?: boolean; disabled?: boolean; style?: ViewStyle }>) {
@@ -38,7 +42,7 @@ export function AuditText({ createdBy, updatedBy }: { createdBy?: string; update
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.canvas }, scroll: { flexGrow: 1 }, screenContent: { flex: 1, padding: 20, gap: 18, width: '100%', maxWidth: 720, alignSelf: 'center' },
+  safe: { flex: 1, backgroundColor: colors.canvas }, keyboardAvoidingView: { flex: 1 }, scroll: { flexGrow: 1 }, screenContent: { flex: 1, padding: 20, gap: 18, width: '100%', maxWidth: 720, alignSelf: 'center' },
   card: { backgroundColor: colors.surface, borderRadius: 22, padding: 18, borderWidth: 1, borderColor: colors.line, ...shadow },
   button: { minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, borderRadius: 15 }, primary: { backgroundColor: colors.forest }, secondary: { backgroundColor: colors.mint }, ghost: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.line }, danger: { backgroundColor: colors.coral }, disabled: { opacity: .55 }, pressed: { transform: [{ scale: .98 }] }, buttonLabel: { fontSize: 15, fontWeight: '800' }, lightLabel: { color: 'white' }, darkLabel: { color: colors.forest },
   field: { gap: 7 }, label: { color: colors.ink, fontWeight: '700', fontSize: 13 }, inputWrap: { backgroundColor: colors.surface, borderColor: colors.line, borderWidth: 1, minHeight: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center' }, input: { flex: 1, minHeight: 50, paddingHorizontal: 14, color: colors.ink, fontSize: 16 }, inputError: { borderColor: colors.coral }, error: { color: colors.coral, fontSize: 12 },
