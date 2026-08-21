@@ -2,6 +2,7 @@ import { type PropsWithChildren, type ReactNode, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, shadow } from '@/constants/design';
+import { useProfiles } from '@/hooks/use-project-data';
 
 export function Screen({ children, scroll = true, style }: PropsWithChildren<{ scroll?: boolean; style?: ViewStyle }>) {
   const content = <View style={[styles.screenContent, style]}>{children}</View>;
@@ -25,11 +26,14 @@ export function Selector({ label, value, options, placeholder = 'Select', onChan
   </View>;
 }
 export function Header({ title, subtitle, right }: { title: string; subtitle?: string; right?: React.ReactNode }) { return <View style={styles.header}><View style={styles.headerText}><Text numberOfLines={1} style={styles.headerTitle}>{title}</Text>{subtitle ? <Text numberOfLines={2} style={styles.headerSubtitle}>{subtitle}</Text> : null}</View>{right ? <View style={styles.headerRight}>{right}</View> : null}</View>; }
-export function AuditText({ createdByName, updatedByName }: { createdByName?: string; updatedByName?: string }) {
-  if (!createdByName && !updatedByName) return null;
-  const text = createdByName && updatedByName && createdByName !== updatedByName
-    ? `Added by ${createdByName} · Edited by ${updatedByName}`
-    : createdByName ? `Added by ${createdByName}` : `Last updated by ${updatedByName}`;
+export function AuditText({ createdBy, updatedBy }: { createdBy?: string; updatedBy?: string }) {
+  const profiles = useProfiles([createdBy ?? '', updatedBy ?? '']);
+  const createdName = createdBy ? profiles[createdBy]?.displayName : undefined;
+  const updatedName = updatedBy ? profiles[updatedBy]?.displayName : undefined;
+  if (!createdName && !updatedName) return null;
+  const text = createdName && updatedName && createdBy !== updatedBy
+    ? `Added by ${createdName} · Edited by ${updatedName}`
+    : createdName ? `Added by ${createdName}` : `Last updated by ${updatedName}`;
   return <Text style={styles.audit}>{text}</Text>;
 }
 

@@ -23,7 +23,7 @@ export default function ExpenseDetail() {
   const methods = useMaster(expense?.projectId, 'paymentMethods');
   const statuses = useMaster(expense?.projectId, 'paymentStatuses');
   const vendors = useMaster(expense?.projectId, 'vendors');
-  const canEdit = Boolean(project && project.status === 'active' && user && (project.ownerId === user.uid || ['admin', 'editor'].includes(project.memberRoles[user.uid])));
+  const canEdit = Boolean(project && project.status === 'active' && user && ['admin', 'editor'].includes(project.role));
 
   useEffect(() => { if (user) expenseRepository.get(user.uid, id).then(setExpense); }, [id, user?.uid]);
   if (!expense) return <Screen><LoadingState /></Screen>;
@@ -55,7 +55,7 @@ export default function ExpenseDetail() {
       <Text style={styles.item}>{expense.item}</Text>
       <Text style={styles.amount}>{formatCurrency(expense.amount, currency)}</Text>
       <Text style={styles.description}>{expense.description || expense.notes || 'No notes added.'}</Text>
-      <AuditText createdByName={expense.createdByName} updatedByName={expense.updatedByName} />
+      <AuditText createdBy={expense.createdBy} updatedBy={expense.updatedBy} />
     </Card>
     <SectionTitle title="Details" />
     <Card style={styles.details}>{details.map(([label, value]) => <View key={label} style={styles.detailRow}><Text style={styles.detailLabel}>{label}</Text><Text style={styles.detailValue}>{value}</Text></View>)}</Card>

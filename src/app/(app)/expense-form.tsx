@@ -27,7 +27,7 @@ export default function ExpenseForm() {
   const categories = useMaster(form.projectId, 'categories'); const stages = useMaster(form.projectId, 'stages'); const units = useMaster(form.projectId, 'units');
   const paidBy = useMaster(form.projectId, 'paymentMethods'); const statuses = useMaster(form.projectId, 'paymentStatuses'); const vendors = useMaster(form.projectId, 'vendors');
   const [errors, setErrors] = useState<Record<string, string>>({}); const [loading, setLoading] = useState(Boolean(id)); const [saving, setSaving] = useState(false); const [showDatePicker, setShowDatePicker] = useState(false); const [quantityText, setQuantityText] = useState(''); const [rateText, setRateText] = useState(''); const [amountText, setAmountText] = useState('');
-  const canEdit = Boolean(activeProject && activeProject.status === 'active' && user && (activeProject.ownerId === user.uid || ['admin', 'editor'].includes(activeProject.memberRoles[user.uid])));
+  const canEdit = Boolean(activeProject && activeProject.status === 'active' && user && ['admin', 'editor'].includes(activeProject.role));
   useEffect(() => { if (selected && !form.projectId) setForm((current) => ({ ...current, projectId: selected.id })); }, [selected?.id]);
   useEffect(() => { if (!id || !user) return; expenseRepository.get(user.uid, id).then((expense) => { if (expense) { setForm(expense); setQuantityText(expense.quantity?.toString() ?? ''); setRateText(expense.rate?.toString() ?? ''); setAmountText(expense.amount?.toString() ?? ''); } setLoading(false); }); }, [id, user?.uid]);
   const set = <K extends keyof Expense>(key: K, value: Expense[K]) => setForm((current) => ({ ...current, [key]: value }));
@@ -38,9 +38,8 @@ export default function ExpenseForm() {
     const nextErrors = validateExpense(draft); setErrors(nextErrors); if (Object.keys(nextErrors).length) return;
     setSaving(true);
     try {
-      const actorName = profile?.displayName || user.displayName || 'Project member';
-      if (id) await expenseRepository.update(user.uid, actorName, id, draft);
-      else await expenseRepository.create(user.uid, actorName, draft as Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdByName' | 'updatedBy' | 'updatedByName'>);
+      if (id) await expenseRepository.update(user.uid, id, draft);
+      else await expenseRepository.create(user.uid, draft as Omit<Expense, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>);
       if (another) { setForm({ projectId: form.projectId, date: today(), item: '', description: '', notes: '' }); setQuantityText(''); setRateText(''); setAmountText(''); setErrors({}); Alert.alert('Saved', 'Ready for the next expense.'); } else router.back();
     } catch (error) { Alert.alert('Unable to save expense', friendlyError(error, 'Please check your connection and try again.')); } finally { setSaving(false); }
   };

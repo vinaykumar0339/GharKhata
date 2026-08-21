@@ -1,6 +1,6 @@
 import type { CategoryBudget, Expense } from '@/types/domain';
 
-export type ExpenseInput = Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>;
+export type ExpenseInput = Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>;
 
 export function validateExpense(input: Partial<ExpenseInput>) {
   const errors: Record<string, string> = {};

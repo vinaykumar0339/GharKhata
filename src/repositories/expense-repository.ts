@@ -1,6 +1,6 @@
 import { deleteDoc, doc, getDoc, orderBy, updateDoc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { createOwned, listenOwned } from '@/repositories/firestore';
+import { createRecord, listenRecords } from '@/repositories/firestore';
 import type { Expense, ExpenseFilters } from '@/types/domain';
 
 function applyFilters(items: Expense[], filters: ExpenseFilters) {
@@ -19,10 +19,10 @@ function applyFilters(items: Expense[], filters: ExpenseFilters) {
 
 export const expenseRepository = {
   watch(userId: string, projectId: string, filters: ExpenseFilters, callback: (items: Expense[]) => void, onError?: (error: Error) => void) {
-    return listenOwned<Expense>('expenses', userId, [where('projectId', '==', projectId), orderBy('date', 'desc')], (items) => callback(applyFilters(items, filters)), onError, false);
+    return listenRecords<Expense>('expenses', [where('projectId', '==', projectId), orderBy('date', 'desc')], (items) => callback(applyFilters(items, filters)), onError);
   },
   async get(_userId: string, id: string) { const snapshot = await getDoc(doc(db, 'expenses', id)); return snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as Expense) : undefined; },
-  create(userId: string, actorName: string, input: Omit<Expense, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'createdByName' | 'updatedBy' | 'updatedByName'>) { return createOwned<Expense>('expenses', { ...input, ownerId: userId, createdBy: userId, createdByName: actorName, updatedBy: userId, updatedByName: actorName }); },
-  update(userId: string, actorName: string, id: string, input: Partial<Expense>) { return updateDoc(doc(db, 'expenses', id), { ...input, updatedBy: userId, updatedByName: actorName, updatedAt: new Date().toISOString() }); },
+  create(userId: string, input: Omit<Expense, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>) { return createRecord<Expense>('expenses', { ...input, createdBy: userId, updatedBy: userId }); },
+  update(userId: string, id: string, input: Partial<Expense>) { return updateDoc(doc(db, 'expenses', id), { ...input, updatedBy: userId, updatedAt: new Date().toISOString() }); },
   delete: (_userId: string, expense: Expense) => deleteDoc(doc(db, 'expenses', expense.id)),
 };

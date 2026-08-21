@@ -14,7 +14,6 @@ export interface Profile {
 export interface Project {
   id: string;
   ownerId: string;
-  ownerName?: string;
   name: string;
   description: string;
   houseType: string;
@@ -24,29 +23,30 @@ export interface Project {
   startDate: string;
   expectedCompletionDate?: string;
   status: 'active' | 'completed' | 'archived';
-  memberIds: string[];
-  memberRoles: Record<string, ProjectRole>;
   createdAt: string;
   updatedAt: string;
   updatedBy?: string;
-  updatedByName?: string;
 }
 
 export interface ProjectMember {
+  id: string;
+  projectId: string;
   userId: string;
-  displayName: string;
+  role: ProjectRole;
+  createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectAccess extends Project {
+  role: ProjectRole;
 }
 
 export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymentMethods' | 'paymentStatuses';
 
 export interface MasterItem {
   id: string;
-  ownerId: string;
   createdBy?: string;
-  createdByName?: string;
   updatedBy?: string;
-  updatedByName?: string;
   projectId: string;
   name: string;
   type: MasterType;
@@ -56,11 +56,8 @@ export interface MasterItem {
 
 export interface Expense {
   id: string;
-  ownerId: string;
   createdBy: string;
-  createdByName?: string;
   updatedBy?: string;
-  updatedByName?: string;
   projectId: string;
   date: string;
   stageId: string;
@@ -86,20 +83,16 @@ export interface CategoryBudget {
 
 export interface Budget {
   id: string;
-  ownerId: string;
   projectId: string;
   totalBudget: number;
   categoryBudgets: CategoryBudget[];
   updatedBy?: string;
-  updatedByName?: string;
   updatedAt: string;
 }
 
 export interface ProjectInvite {
   id: string;
-  ownerId: string;
   projectId: string;
-  projectName: string;
   invitedEmail: string;
   role: ProjectRole;
   status: 'pending' | 'accepted' | 'declined';

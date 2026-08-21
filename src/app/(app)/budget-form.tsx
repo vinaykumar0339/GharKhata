@@ -18,7 +18,7 @@ export default function BudgetForm() {
   const [total, setTotal] = useState('');
   const [values, setValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const canPlan = Boolean(project && project.status === 'active' && user && (project.ownerId === user.uid || project.memberRoles[user.uid] === 'admin'));
+  const canPlan = Boolean(project && project.status === 'active' && user && project.role === 'admin');
   const categoryBudgets = Object.entries(values).filter(([, amount]) => Number(amount) > 0).map(([categoryId, amount]) => ({ categoryId, amount: Number(amount) }));
   const budgetErrors = validateBudget(Number(total), categoryBudgets);
   useEffect(() => { if (existing) { setTotal(String(existing.totalBudget)); setValues(Object.fromEntries(existing.categoryBudgets.map((line) => [line.categoryId, String(line.amount)]))); } else if (project?.totalBudget) setTotal(String(project.totalBudget)); }, [existing?.updatedAt, project?.id]);
@@ -27,9 +27,8 @@ export default function BudgetForm() {
     if (budgetErrors.categoryBudgets) return Alert.alert('Category allocations are too high', budgetErrors.categoryBudgets);
     setSaving(true);
     try {
-      const actorName = profile?.displayName || user.displayName || 'Project admin';
-      await budgetRepository.save(user.uid, actorName, project.id, Number(total), categoryBudgets);
-      await projectRepository.update(user.uid, actorName, project.id, { totalBudget: Number(total) });
+      await budgetRepository.save(user.uid, project.id, Number(total), categoryBudgets);
+      await projectRepository.update(user.uid, project.id, { totalBudget: Number(total) });
       router.back();
     } catch { Alert.alert('Could not save budget', 'Please try again.'); } finally { setSaving(false); }
   };

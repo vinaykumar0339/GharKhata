@@ -20,7 +20,7 @@ export default function Expenses() {
   const stages = useMaster(selected?.id, 'stages');
   const vendors = useMaster(selected?.id, 'vendors');
   const statuses = useMaster(selected?.id, 'paymentStatuses');
-  const canEdit = Boolean(selected && selected.status === 'active' && user && (selected.ownerId === user.uid || ['admin', 'editor'].includes(selected.memberRoles[user.uid])));
+  const canEdit = Boolean(selected && selected.status === 'active' && user && ['admin', 'editor'].includes(selected.role));
   const category = (id: string) => categories.find((item) => item.id === id)?.name ?? 'Uncategorized';
   const stage = (id: string) => stages.find((item) => item.id === id)?.name ?? 'No stage';
   const status = (id: string) => statuses.find((item) => item.id === id)?.name ?? 'Unknown';
@@ -41,7 +41,7 @@ export default function Expenses() {
     </Card> : null}
     {activeCount ? <View style={styles.chips}><Pill>{activeCount} filter{activeCount > 1 ? 's' : ''} active</Pill><Pressable onPress={() => setFilters({ sort: filters.sort })}><Text style={styles.clear}>Clear all</Text></Pressable></View> : null}
     {items.length ? <View style={styles.list}>{items.map((expense) => <Pressable key={expense.id} onPress={() => router.push({ pathname: '/(app)/expense/[id]', params: { id: expense.id } })}>
-      <Card style={styles.row}><View style={styles.rowMain}><Text style={styles.item}>{expense.item}</Text><Text style={styles.meta}>{category(expense.categoryId)} · {stage(expense.stageId)}</Text><Text style={styles.date}>{formatDate(expense.date, currency)}</Text><AuditText createdByName={expense.createdByName} updatedByName={expense.updatedByName} /></View><View style={styles.rowAmount}><Text style={styles.amount}>{formatCurrency(expense.amount, currency)}</Text><Pill tone={status(expense.paymentStatusId) === 'Paid' ? 'green' : 'amber'}>{status(expense.paymentStatusId)}</Pill></View></Card>
+      <Card style={styles.row}><View style={styles.rowMain}><Text style={styles.item}>{expense.item}</Text><Text style={styles.meta}>{category(expense.categoryId)} · {stage(expense.stageId)}</Text><Text style={styles.date}>{formatDate(expense.date, currency)}</Text><AuditText createdBy={expense.createdBy} updatedBy={expense.updatedBy} /></View><View style={styles.rowAmount}><Text style={styles.amount}>{formatCurrency(expense.amount, currency)}</Text><Pill tone={status(expense.paymentStatusId) === 'Paid' ? 'green' : 'amber'}>{status(expense.paymentStatusId)}</Pill></View></Card>
     </Pressable>)}</View> : <EmptyState icon="◌" title="No expenses found" body={activeCount ? 'Try clearing a filter or searching for something else.' : 'Track your first construction expense to make your budget useful.'} action={!activeCount && canEdit ? <Button onPress={() => router.push('/(app)/expense-form')}>Add expense</Button> : undefined} />}
     {canEdit && items.length ? <Button onPress={() => router.push('/(app)/expense-form')}>＋ Add expense</Button> : null}
     <View style={styles.bottomSpace} />

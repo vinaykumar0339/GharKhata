@@ -5,7 +5,6 @@ import { colors } from '@/constants/design';
 import { friendlyError } from '@/lib/errors';
 import { authRepository } from '@/repositories/auth-repository';
 import { profileRepository } from '@/repositories/profile-repository';
-import { projectMemberRepository } from '@/repositories/project-member-repository';
 import { useApp } from '@/providers/app-provider';
 
 export default function ProfileScreen() {
@@ -23,8 +22,7 @@ export default function ProfileScreen() {
     try {
       await authRepository.updateDisplayName(name);
       await profileRepository.displayName(user.uid, name);
-      await projectMemberRepository.syncDisplayName(user.uid, name);
-      Alert.alert('Profile updated', 'Your name will be used for new project activity.');
+      Alert.alert('Profile updated', 'Your name is updated everywhere it is shown.');
     } catch (error) {
       Alert.alert('Could not update profile', friendlyError(error, 'Please try again.'));
     } finally {
@@ -32,5 +30,5 @@ export default function ProfileScreen() {
     }
   };
 
-  return <Screen><Header title="Profile" subtitle="Your details appear on new project activity." /><Field label="Display name" value={displayName} onChangeText={setDisplayName} placeholder="Your name" autoCapitalize="words" /><Field label="Email" value={user?.email ?? ''} editable={false} /><Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>Changing your name does not rewrite activity that was already recorded.</Text><Button loading={saving} onPress={save}>Save profile</Button></Screen>;
+  return <Screen><Header title="Profile" subtitle="Your details appear across shared projects." /><Field label="Display name" value={displayName} onChangeText={setDisplayName} placeholder="Your name" autoCapitalize="words" /><Field label="Email" value={user?.email ?? ''} editable={false} /><Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>Your new name appears everywhere immediately.</Text><Button loading={saving} onPress={save}>Save profile</Button></Screen>;
 }
