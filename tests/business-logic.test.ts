@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bucketTotal, budgetRows, categoryTotals, expenseTotal, fundingSourceTotals } from '../src/lib/analytics.ts';
+import { bucketTotal, budgetRows, budgetTypeTotals, categoryTotals, expenseTotal, fundingSourceTotals } from '../src/lib/analytics.ts';
 import { calculateAmount, formatCurrency } from '../src/lib/format.ts';
 import { isDuplicateMasterName, validateBudget } from '../src/lib/validation.ts';
 
@@ -45,6 +45,10 @@ test('other project costs are tracked outside the construction envelope', () => 
   const budget = { id: 'project-a', projectId: 'project-a', totalBudget: 900000, constructionBudget: 800000, otherBudget: 100000, categoryBudgets: [{ categoryId: 'cement', amount: 800000 }, { categoryId: 'cement', amount: 100000, costBucket: 'other' as const }], updatedAt: '' };
   assert.equal(budgetRows(budget, expenses, categories)[0]?.actual, 700000);
   assert.equal(budgetRows(budget, expenses, categories, 'other')[0]?.actual, 90000);
+  assert.deepEqual(budgetTypeTotals(expenses, budget), [
+    { bucket: 'construction', name: 'Construction work', planned: 800000, actual: 700000, difference: 100000 },
+    { bucket: 'other', name: 'Other project costs', planned: 100000, actual: 90000, difference: 10000 },
+  ]);
 });
 
 test('funding source totals preserve unassigned legacy expenses', () => {

@@ -4,6 +4,23 @@ export function expenseTotal(expenses: Expense[]) { return expenses.reduce((sum,
 export function expenseBucket(expense: Expense): CostBucket { return expense.costBucket ?? 'construction'; }
 export function bucketTotal(expenses: Expense[], bucket: CostBucket) { return expenses.filter((expense) => expenseBucket(expense) === bucket).reduce((sum, expense) => sum + expense.amount, 0); }
 
+/** A side-by-side view of the two ways project spending is budgeted. */
+export function budgetTypeTotals(expenses: Expense[], budget?: Budget, legacyConstructionBudget = 0) {
+  const constructionBudget = budget?.constructionBudget ?? budget?.totalBudget ?? legacyConstructionBudget;
+  const otherBudget = budget?.otherBudget ?? 0;
+  return (['construction', 'other'] as const).map((bucket) => {
+    const planned = bucket === 'construction' ? constructionBudget : otherBudget;
+    const actual = bucketTotal(expenses, bucket);
+    return {
+      bucket,
+      name: bucket === 'construction' ? 'Construction work' : 'Other project costs',
+      planned,
+      actual,
+      difference: planned - actual,
+    };
+  });
+}
+
 export function categoryTotals(expenses: Expense[], categories: MasterItem[]) {
   return categories.map((category) => ({
     id: category.id, name: category.name,
