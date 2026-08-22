@@ -1,6 +1,8 @@
-import type { Budget, Expense, MasterItem } from '@/types/domain';
+import type { Budget, CostBucket, Expense, MasterItem } from '@/types/domain';
 
 export function expenseTotal(expenses: Expense[]) { return expenses.reduce((sum, expense) => sum + expense.amount, 0); }
+export function expenseBucket(expense: Expense): CostBucket { return expense.costBucket ?? 'construction'; }
+export function bucketTotal(expenses: Expense[], bucket: CostBucket) { return expenses.filter((expense) => expenseBucket(expense) === bucket).reduce((sum, expense) => sum + expense.amount, 0); }
 
 export function categoryTotals(expenses: Expense[], categories: MasterItem[]) {
   return categories.map((category) => ({
@@ -16,12 +18,15 @@ export function stageTotals(expenses: Expense[], stages: MasterItem[]) {
   })).filter((item) => item.amount > 0).sort((a, b) => b.amount - a.amount);
 }
 
-export function budgetRows(budget: Budget | undefined, expenses: Expense[], categories: MasterItem[]) {
-  const totals = categoryTotals(expenses, categories);
-  return (budget?.categoryBudgets ?? []).map((line) => {
-    const actual = totals.find((item) => item.id === line.categoryId)?.amount ?? 0;
-    return { categoryId: line.categoryId, name: categories.find((item) => item.id === line.categoryId)?.name ?? 'Removed category', budget: line.amount, actual, difference: line.amount - actual };
-  });
+export function budgetRows(budget: Budget | undefined, expenses: Expense[], categories: MasterItem[], bucket: CostBucket = 'construction') {
+  const totals = categoryTotals(expenses.filter((expense) => expenseBucket(expense) === bucket), categories);
+  const allocations = (budget?.categoryBudgets ?? []).filter((line) => (line.costBucket ?? 'construction') === bucket);
+  const categoryIds = new Set([...allocations.map((line) => line.categoryId), ...totals.map((item) => item.id)]);
+  return [...categoryIds].map((categoryId) => {
+    const planned = allocations.find((line) => line.categoryId === categoryId)?.amount ?? 0;
+    const actual = totals.find((item) => item.id === categoryId)?.amount ?? 0;
+    return { categoryId, name: categories.find((item) => item.id === categoryId)?.name ?? 'Removed category', budget: planned, actual, difference: planned - actual };
+  }).sort((a, b) => b.actual - a.actual || b.budget - a.budget);
 }
 
 export function monthTotal(expenses: Expense[], monthOffset = 0) {

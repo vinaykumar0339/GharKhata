@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Card, EmptyState, Header, Pill, Screen, SectionTitle } from '@/components/ui';
 import { ProjectPicker } from '@/components/project-picker';
 import { colors } from '@/constants/design';
-import { categoryTotals, expenseTotal, monthlyTotals, monthTotal, stageTotals } from '@/lib/analytics';
+import { bucketTotal, categoryTotals, expenseTotal, monthlyTotals, monthTotal, stageTotals } from '@/lib/analytics';
 import { formatCurrency } from '@/lib/format';
 import { useBudget, useExpenses, useMaster, useProjects } from '@/hooks/use-project-data';
 import { useApp } from '@/providers/app-provider';
@@ -29,6 +29,10 @@ export default function Reports() {
   const trend = monthlyTotals(items);
   const maxTrend = Math.max(...trend.map((item) => item.amount), 1);
   const planned = budget?.totalBudget ?? project.totalBudget;
+  const constructionPlanned = budget?.constructionBudget ?? planned;
+  const otherPlanned = budget?.otherBudget ?? 0;
+  const constructionSpent = bucketTotal(items, 'construction');
+  const otherSpent = bucketTotal(items, 'other');
   const budgetPercent = planned ? Math.round((total / planned) * 100) : undefined;
   const highestCategory = categoryData[0];
 
@@ -45,6 +49,12 @@ export default function Reports() {
       <View style={styles.budgetTrack}><View style={[styles.budgetFill, budgetPercent! > 100 && styles.overBudgetFill, { width: `${Math.min(budgetPercent!, 100)}%` }]} /></View>
       <Text style={styles.budgetCaption}>{formatCurrency(total, currency)} spent of {formatCurrency(planned, currency)}</Text>
     </Card> : null}
+
+    <SectionTitle title="Cost buckets" action="Planned vs actual" />
+    <Card style={styles.bucketCard}>
+      <BucketRow label="Construction" spent={constructionSpent} planned={constructionPlanned} currency={currency} />
+      <BucketRow label="Other project costs" spent={otherSpent} planned={otherPlanned} currency={currency} />
+    </Card>
 
     <SectionTitle title="Spending trend" action="Last 6 months" />
     <Card style={styles.trendCard}>
@@ -70,6 +80,10 @@ function BreakdownRow({ name, amount, total, color, currency }: { name: string; 
   const percent = Math.round((amount / total) * 100);
   return <View style={styles.breakdownRow}><View style={styles.breakdownHeading}><Text numberOfLines={1} style={styles.breakdownName}>{name}</Text><Text style={styles.breakdownAmount}>{formatCurrency(amount, currency)} · {percent}%</Text></View><View style={styles.breakdownTrack}><View style={[styles.breakdownFill, { backgroundColor: color, width: `${percent}%` }]} /></View></View>;
 }
+function BucketRow({ label, spent, planned, currency }: { label: string; spent: number; planned: number; currency: CurrencyCode }) {
+  const over = Math.max(spent - planned, 0); const caption = planned ? over ? `${formatCurrency(over, currency)} over` : `${formatCurrency(planned - spent, currency)} left` : 'No plan set';
+  return <View style={styles.bucketRow}><View><Text style={styles.bucketName}>{label}</Text><Text style={styles.bucketCaption}>{formatCurrency(spent, currency)} spent · {caption}</Text></View><Text style={styles.bucketPlan}>{formatCurrency(planned, currency)}</Text></View>;
+}
 function formatCompactCurrency(amount: number, currency: CurrencyCode) {
   const symbol = currency === 'INR' ? '₹' : '$';
   if (amount >= 100000) return `${symbol}${(amount / 100000).toFixed(1)}L`;
@@ -82,5 +96,6 @@ const styles = StyleSheet.create({
   budgetCard: { gap: 10, backgroundColor: colors.mint, borderColor: '#BBDDCB' }, overBudget: { gap: 10, backgroundColor: '#FFF0EB', borderColor: '#F5B6A8' }, budgetHeading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }, eyebrow: { color: colors.muted, fontSize: 10, letterSpacing: 1, fontWeight: '900' }, budgetValue: { color: colors.ink, fontSize: 24, fontWeight: '900', marginTop: 2 }, budgetTrack: { height: 10, borderRadius: 8, backgroundColor: 'rgba(25,49,38,.12)', overflow: 'hidden' }, budgetFill: { height: '100%', borderRadius: 8, backgroundColor: colors.forest }, overBudgetFill: { backgroundColor: colors.coral }, budgetCaption: { color: colors.muted, fontSize: 12, fontWeight: '700' },
   trendCard: { gap: 11 }, trendChart: { height: 184, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 7 }, barColumn: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }, barValue: { color: colors.muted, fontSize: 10, fontWeight: '800', minHeight: 13 }, barArea: { flex: 1, width: '100%', justifyContent: 'flex-end', backgroundColor: '#EEF3EF', borderRadius: 7, overflow: 'hidden' }, bar: { width: '100%', borderRadius: 7 }, barLabel: { color: colors.muted, fontSize: 11, fontWeight: '800' }, chartCaption: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   breakdownCard: { gap: 16 }, breakdownRow: { gap: 7 }, breakdownHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 }, breakdownName: { color: colors.ink, fontWeight: '800', flex: 1 }, breakdownAmount: { color: colors.muted, fontSize: 12, fontWeight: '800' }, breakdownTrack: { height: 9, borderRadius: 9, backgroundColor: '#EEF3EF', overflow: 'hidden' }, breakdownFill: { height: '100%', borderRadius: 9 },
+  bucketCard: { gap: 15 }, bucketRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }, bucketName: { color: colors.ink, fontWeight: '900', fontSize: 15 }, bucketCaption: { color: colors.muted, fontSize: 12, marginTop: 3 }, bucketPlan: { color: colors.forest, fontWeight: '900', fontSize: 14 },
   insight: { backgroundColor: '#FFF7D9', borderColor: '#F5E6A9', gap: 6 }, insightEyebrow: { color: '#876D14', fontSize: 10, letterSpacing: 1, fontWeight: '900' }, insightText: { color: colors.ink, fontSize: 15, fontWeight: '800', lineHeight: 21 },
 });

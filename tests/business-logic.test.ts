@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { budgetRows, categoryTotals, expenseTotal } from '../src/lib/analytics.ts';
+import { bucketTotal, budgetRows, categoryTotals, expenseTotal } from '../src/lib/analytics.ts';
 import { calculateAmount, formatCurrency } from '../src/lib/format.ts';
 import { validateBudget } from '../src/lib/validation.ts';
 
@@ -29,6 +29,20 @@ test('budget actuals use relationships by ID and mark overruns', () => {
 test('category budget allocations cannot exceed the total budget', () => {
   assert.deepEqual(validateBudget(1000, [{ categoryId: 'cement', amount: 600 }, { categoryId: 'steel', amount: 400 }]), {});
   assert.deepEqual(validateBudget(1000, [{ categoryId: 'cement', amount: 600 }, { categoryId: 'steel', amount: 401 }]), {
-    categoryBudgets: 'Category allocations cannot exceed the total budget.',
+    categoryBudgets: 'Category allocations cannot exceed the construction budget.',
   });
+});
+
+test('other project costs are tracked outside the construction envelope', () => {
+  const expenses = [
+    { id: 'construction-1', ...baseExpense, amount: 700000 },
+    { id: 'other-1', ...baseExpense, costBucket: 'other' as const, amount: 90000 },
+  ];
+  assert.equal(bucketTotal(expenses, 'construction'), 700000);
+  assert.equal(bucketTotal(expenses, 'other'), 90000);
+
+  const categories = [{ id: 'cement', projectId: 'project-a', name: 'Cement', type: 'categories' as const, createdAt: '', updatedAt: '' }];
+  const budget = { id: 'project-a', projectId: 'project-a', totalBudget: 900000, constructionBudget: 800000, otherBudget: 100000, categoryBudgets: [{ categoryId: 'cement', amount: 800000 }, { categoryId: 'cement', amount: 100000, costBucket: 'other' as const }], updatedAt: '' };
+  assert.equal(budgetRows(budget, expenses, categories)[0]?.actual, 700000);
+  assert.equal(budgetRows(budget, expenses, categories, 'other')[0]?.actual, 90000);
 });

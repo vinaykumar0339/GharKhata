@@ -7,7 +7,9 @@ import { colors } from '@/constants/design';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { useExpenses, useMaster, useProjects } from '@/hooks/use-project-data';
 import { useApp } from '@/providers/app-provider';
-import type { ExpenseFilters } from '@/types/domain';
+import type { CostBucket, ExpenseFilters } from '@/types/domain';
+
+const costBuckets: { id: CostBucket; name: string }[] = [{ id: 'construction', name: 'Construction work' }, { id: 'other', name: 'Other project cost' }];
 
 export default function Expenses() {
   const { user, profile, currency } = useApp();
@@ -34,6 +36,7 @@ export default function Expenses() {
     </View>
     {showFilter ? <Card style={styles.filters}>
       <Selector label="Category" value={filters.categoryId} options={categories} onChange={(categoryId) => setFilters((current) => ({ ...current, categoryId }))} />
+      <Selector label="Cost bucket" value={filters.costBucket} options={costBuckets} onChange={(costBucket) => setFilters((current) => ({ ...current, costBucket: costBucket as CostBucket }))} />
       <Selector label="Stage" value={filters.stageId} options={stages} onChange={(stageId) => setFilters((current) => ({ ...current, stageId }))} />
       <Selector label="Vendor" value={filters.vendorId} options={vendors} onChange={(vendorId) => setFilters((current) => ({ ...current, vendorId }))} />
       <Selector label="Payment status" value={filters.paymentStatusId} options={statuses} onChange={(paymentStatusId) => setFilters((current) => ({ ...current, paymentStatusId }))} />
@@ -41,7 +44,7 @@ export default function Expenses() {
     </Card> : null}
     {activeCount ? <View style={styles.chips}><Pill>{activeCount} filter{activeCount > 1 ? 's' : ''} active</Pill><Pressable onPress={() => setFilters({ sort: filters.sort })}><Text style={styles.clear}>Clear all</Text></Pressable></View> : null}
     {items.length ? <View style={styles.list}>{items.map((expense) => <Pressable key={expense.id} onPress={() => router.push({ pathname: '/(app)/expense/[id]', params: { id: expense.id } })}>
-      <Card style={styles.row}><View style={styles.rowMain}><Text style={styles.item}>{expense.item}</Text><Text style={styles.meta}>{category(expense.categoryId)} · {stage(expense.stageId)}</Text><Text style={styles.date}>{formatDate(expense.date, currency)}</Text><AuditText createdBy={expense.createdBy} updatedBy={expense.updatedBy} /></View><View style={styles.rowAmount}><Text style={styles.amount}>{formatCurrency(expense.amount, currency)}</Text><Pill tone={status(expense.paymentStatusId) === 'Paid' ? 'green' : 'amber'}>{status(expense.paymentStatusId)}</Pill></View></Card>
+      <Card style={styles.row}><View style={styles.rowMain}><Text style={styles.item}>{expense.item}</Text><Text style={styles.meta}>{expense.costBucket === 'other' ? 'Other project cost' : 'Construction'} · {category(expense.categoryId)} · {stage(expense.stageId)}</Text><Text style={styles.date}>{formatDate(expense.date, currency)}</Text><AuditText createdBy={expense.createdBy} updatedBy={expense.updatedBy} /></View><View style={styles.rowAmount}><Text style={styles.amount}>{formatCurrency(expense.amount, currency)}</Text><Pill tone={status(expense.paymentStatusId) === 'Paid' ? 'green' : 'amber'}>{status(expense.paymentStatusId)}</Pill></View></Card>
     </Pressable>)}</View> : <EmptyState icon="◌" title="No expenses found" body={activeCount ? 'Try clearing a filter or searching for something else.' : 'Track your first construction expense to make your budget useful.'} action={!activeCount && canEdit ? <Button onPress={() => router.push('/(app)/expense-form')}>Add expense</Button> : undefined} />}
     {canEdit && items.length ? <Button onPress={() => router.push('/(app)/expense-form')}>＋ Add expense</Button> : null}
     <View style={styles.bottomSpace} />

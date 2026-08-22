@@ -41,6 +41,7 @@ export default function ExpenseDetail() {
   ]);
 
   const details = [
+    ['Cost bucket', expense.costBucket === 'other' ? 'Other project cost' : 'Construction work'],
     ['Stage', name(stages, expense.stageId)],
     ['Category', name(categories, expense.categoryId)],
     ['Quantity', expense.quantity !== undefined ? `${expense.quantity} ${name(units, expense.unitId)}` : '—'],

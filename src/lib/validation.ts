@@ -17,17 +17,17 @@ export function validateExpense(input: Partial<ExpenseInput>) {
   return errors;
 }
 
-export function validateBudget(totalBudget: number, categoryBudgets: CategoryBudget[]) {
+export function validateBudget(constructionBudget: number, categoryBudgets: CategoryBudget[]) {
   const errors: Record<string, string> = {};
-  if (!Number.isFinite(totalBudget) || totalBudget <= 0) {
-    errors.totalBudget = 'Total budget must be greater than zero.';
+  if (!Number.isFinite(constructionBudget) || constructionBudget < 0) {
+    errors.constructionBudget = 'Construction budget cannot be negative.';
     return errors;
   }
 
   const categoryTotal = categoryBudgets.reduce((sum, line) => sum + line.amount, 0);
-  const roundingTolerance = Number.EPSILON * Math.max(1, Math.abs(totalBudget), Math.abs(categoryTotal)) * 10;
-  if (categoryTotal - totalBudget > roundingTolerance) {
-    errors.categoryBudgets = 'Category allocations cannot exceed the total budget.';
+  const roundingTolerance = Number.EPSILON * Math.max(1, Math.abs(constructionBudget), Math.abs(categoryTotal)) * 10;
+  if (categoryTotal - constructionBudget > roundingTolerance) {
+    errors.categoryBudgets = 'Category allocations cannot exceed the construction budget.';
   }
   return errors;
 }

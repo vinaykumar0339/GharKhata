@@ -1,6 +1,7 @@
 export type CurrencyCode = 'INR' | 'USD';
 export type PaymentState = 'Paid' | 'Pending' | 'Partially Paid' | 'Advance';
 export type ProjectRole = 'admin' | 'editor' | 'viewer';
+export type CostBucket = 'construction' | 'other';
 
 export interface Profile {
   id: string;
@@ -68,6 +69,8 @@ export interface Expense {
   unitId?: string;
   rate?: number;
   amount: number;
+  /** Older expenses predate this field and are treated as construction costs. */
+  costBucket?: CostBucket;
   paidById: string;
   paymentStatusId: string;
   vendorId?: string;
@@ -79,12 +82,17 @@ export interface Expense {
 export interface CategoryBudget {
   categoryId: string;
   amount: number;
+  /** When absent, this is a legacy construction-category allocation. */
+  costBucket?: CostBucket;
 }
 
 export interface Budget {
   id: string;
   projectId: string;
   totalBudget: number;
+  /** When absent, totalBudget is a legacy construction-only budget. */
+  constructionBudget?: number;
+  otherBudget?: number;
   categoryBudgets: CategoryBudget[];
   updatedBy?: string;
   updatedAt: string;
@@ -108,6 +116,7 @@ export interface ExpenseFilters {
   vendorId?: string;
   paymentStatusId?: string;
   paidById?: string;
+  costBucket?: CostBucket;
   from?: string;
   to?: string;
   sort?: 'newest' | 'oldest' | 'highest' | 'lowest';
