@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Card, EmptyState, Header, Pill, Screen, SectionTitle } from '@/components/ui';
 import { ProjectPicker } from '@/components/project-picker';
 import { colors } from '@/constants/design';
-import { bucketTotal, categoryTotals, expenseTotal, monthlyTotals, monthTotal, stageTotals } from '@/lib/analytics';
+import { bucketTotal, categoryTotals, expenseTotal, fundingSourceTotals, monthlyTotals, monthTotal, stageTotals } from '@/lib/analytics';
 import { formatCurrency } from '@/lib/format';
 import { useBudget, useExpenses, useMaster, useProjects } from '@/hooks/use-project-data';
 import { useApp } from '@/providers/app-provider';
@@ -16,6 +16,7 @@ export default function Reports() {
   const project = projects.find((item) => item.id === profile?.selectedProjectId) ?? projects[0];
   const { items } = useExpenses(user?.uid, project?.id);
   const categories = useMaster(project?.id, 'categories');
+  const fundingSources = useMaster(project?.id, 'fundingSources');
   const stages = useMaster(project?.id, 'stages');
   const budget = useBudget(user?.uid, project?.id);
 
@@ -25,6 +26,7 @@ export default function Reports() {
   const total = expenseTotal(items);
   const thisMonth = monthTotal(items);
   const categoryData = categoryTotals(items, categories).slice(0, 5);
+  const fundingData = fundingSourceTotals(items, fundingSources).slice(0, 5);
   const stageData = stageTotals(items, stages).slice(0, 5);
   const trend = monthlyTotals(items);
   const maxTrend = Math.max(...trend.map((item) => item.amount), 1);
@@ -64,6 +66,9 @@ export default function Reports() {
 
     <SectionTitle title="Where your money goes" action="By category" />
     <Card style={styles.breakdownCard}>{categoryData.map((item, index) => <BreakdownRow key={item.id} name={item.name} amount={item.amount} total={total} color={chartColors[index]} currency={currency} />)}</Card>
+
+    <SectionTitle title="Where money came from" action="By funding source" />
+    <Card style={styles.breakdownCard}>{fundingData.map((item, index) => <BreakdownRow key={item.id} name={item.name} amount={item.amount} total={total} color={chartColors[index]} currency={currency} />)}</Card>
 
     <SectionTitle title="Progress spending" action="By stage" />
     <Card style={styles.breakdownCard}>{stageData.map((item, index) => <BreakdownRow key={item.id} name={item.name} amount={item.amount} total={total} color={chartColors[index]} currency={currency} />)}</Card>

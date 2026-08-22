@@ -7,6 +7,7 @@
     { "collectionGroup": "units", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
     { "collectionGroup": "paymentMethods", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
     { "collectionGroup": "paymentStatuses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "fundingSources", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
     { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
     { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "categoryId", "order": "ASCENDING" }] },
     { "collectionGroup": "expenses", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "projectId", "order": "ASCENDING" }, { "fieldPath": "stageId", "order": "ASCENDING" }] },

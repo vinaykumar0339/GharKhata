@@ -29,7 +29,7 @@ export default function ExpenseForm() {
   const [form, setForm] = useState<Partial<Expense>>({ projectId: selected?.id, costBucket: 'construction', date: today(), item: '', description: '', notes: '' });
   const activeProject = projects.find((project) => project.id === form.projectId) ?? selected;
   const categories = useMaster(form.projectId, 'categories'); const stages = useMaster(form.projectId, 'stages'); const units = useMaster(form.projectId, 'units');
-  const paidBy = useMaster(form.projectId, 'paymentMethods'); const statuses = useMaster(form.projectId, 'paymentStatuses'); const vendors = useMaster(form.projectId, 'vendors');
+  const paidBy = useMaster(form.projectId, 'paymentMethods'); const fundingSources = useMaster(form.projectId, 'fundingSources'); const statuses = useMaster(form.projectId, 'paymentStatuses'); const vendors = useMaster(form.projectId, 'vendors');
   const [errors, setErrors] = useState<Record<string, string>>({}); const [loading, setLoading] = useState(Boolean(id)); const [saving, setSaving] = useState(false); const [showDatePicker, setShowDatePicker] = useState(false); const [quantityText, setQuantityText] = useState(''); const [rateText, setRateText] = useState(''); const [amountText, setAmountText] = useState('');
   const canEdit = Boolean(activeProject && activeProject.status === 'active' && user && ['admin', 'editor'].includes(activeProject.role));
   useEffect(() => { if (selected && !form.projectId) setForm((current) => ({ ...current, projectId: selected.id })); }, [selected?.id]);
@@ -66,6 +66,7 @@ export default function ExpenseForm() {
     </View>
     <Field label={usesRate ? `Amount (calculated: ${computed})` : 'Amount'} value={usesRate ? String(computed) : amountText} onChangeText={(value) => { if (!usesRate && isDecimalDraft(value)) { setAmountText(value); set('amount', decimalValue(value) ?? 0); } }} editable={!usesRate} error={errors.amount} keyboardType="decimal-pad" placeholder="0 or 250.50" />
     <Selector label="Paid by" value={form.paidById} options={paidBy} onChange={(value) => set('paidById', value)} error={errors.paidById} />
+    <Selector label="Funding source" value={form.fundingSourceId} options={fundingSources} onChange={(value) => set('fundingSourceId', value)} error={errors.fundingSourceId} />
     <Selector label="Payment status" value={form.paymentStatusId} options={statuses} onChange={(value) => set('paymentStatusId', value)} error={errors.paymentStatusId} />
     <Selector label="Vendor (optional)" value={form.vendorId} options={vendors} onChange={(value) => set('vendorId', value)} />
     <Field label="Notes (optional)" value={form.notes} onChangeText={(value) => set('notes', value)} multiline style={styles.notes} placeholder="Foundation work" />

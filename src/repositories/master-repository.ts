@@ -8,6 +8,7 @@ const defaults: Record<MasterType, string[]> = {
   stages: ['Planning', 'Foundation', 'Basement', 'Structure', 'Brick Work', 'Plastering', 'Electrical', 'Plumbing', 'Flooring', 'Doors & Windows', 'Painting', 'Kitchen', 'Interior', 'External Work', 'Completion', 'Other'],
   vendors: [], units: ['Bag', 'Kg', 'Ton', 'Piece', 'Sq Ft', 'Sq M', 'Cft', 'Sq Yd', 'Litre', 'Meter', 'Day', 'Hour', 'Load', 'Trip', 'Other'],
   paymentMethods: ['Cash', 'UPI', 'Bank Transfer', 'Credit Card', 'Debit Card', 'Cheque', 'Loan', 'Other'], paymentStatuses: ['Paid', 'Pending', 'Partially Paid', 'Advance'],
+  fundingSources: [],
 };
 
 export const masterRepository = {
@@ -17,7 +18,7 @@ export const masterRepository = {
   update(userId: string, type: MasterType, id: string, name: string) { return updateDoc(doc(db, type, id), { name: name.trim(), updatedBy: userId, updatedAt: new Date().toISOString() }); },
   delete: async (type: MasterType, id: string) => deleteDoc(doc(db, type, id)),
   async dependencies(projectId: string, type: MasterType, id: string) {
-    const field: Partial<Record<MasterType, keyof Expense>> = { categories: 'categoryId', stages: 'stageId', vendors: 'vendorId', units: 'unitId', paymentMethods: 'paidById', paymentStatuses: 'paymentStatusId' };
+    const field: Partial<Record<MasterType, keyof Expense>> = { categories: 'categoryId', stages: 'stageId', vendors: 'vendorId', units: 'unitId', paymentMethods: 'paidById', paymentStatuses: 'paymentStatusId', fundingSources: 'fundingSourceId' };
     const expenseField = field[type]; if (!expenseField) return 0;
     return (await getDocs(query(collection(db, 'expenses'), where('projectId', '==', projectId), where(expenseField as string, '==', id)))).size;
   },

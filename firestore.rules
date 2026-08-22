@@ -10,7 +10,7 @@ service cloud.firestore {
     function isOwner(projectId) { return signedIn() && get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid; }
     function canEdit(projectId) { return isActive(projectId) && isMember(projectId) && membership(projectId, request.auth.uid).data.role in ['admin', 'editor']; }
     function acceptedInvite(projectId) { return getAfter(/databases/$(database)/documents/projectInvites/$(projectId + '__' + request.auth.token.email)); }
-    function allowedMaster(name) { return name in ['categories', 'stages', 'vendors', 'units', 'paymentMethods', 'paymentStatuses']; }
+    function allowedMaster(name) { return name in ['categories', 'stages', 'vendors', 'units', 'paymentMethods', 'paymentStatuses', 'fundingSources']; }
     function validMember(data) { return data.keys().hasOnly(['projectId', 'userId', 'role', 'createdAt', 'updatedAt']) && data.projectId is string && data.userId is string && data.role in ['admin', 'editor', 'viewer'] && data.createdAt is string && data.updatedAt is string; }
 
     match /users/{userId} {

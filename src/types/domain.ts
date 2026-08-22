@@ -42,7 +42,7 @@ export interface ProjectAccess extends Project {
   role: ProjectRole;
 }
 
-export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymentMethods' | 'paymentStatuses';
+export type MasterType = 'categories' | 'stages' | 'vendors' | 'units' | 'paymentMethods' | 'paymentStatuses' | 'fundingSources';
 
 export interface MasterItem {
   id: string;
@@ -72,6 +72,7 @@ export interface Expense {
   /** Older expenses predate this field and are treated as construction costs. */
   costBucket?: CostBucket;
   paidById: string;
+  fundingSourceId?: string;
   paymentStatusId: string;
   vendorId?: string;
   notes: string;
@@ -116,6 +117,7 @@ export interface ExpenseFilters {
   vendorId?: string;
   paymentStatusId?: string;
   paidById?: string;
+  fundingSourceId?: string;
   costBucket?: CostBucket;
   from?: string;
   to?: string;

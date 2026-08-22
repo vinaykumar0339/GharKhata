@@ -21,6 +21,7 @@ export default function ExpenseDetail() {
   const stages = useMaster(expense?.projectId, 'stages');
   const units = useMaster(expense?.projectId, 'units');
   const methods = useMaster(expense?.projectId, 'paymentMethods');
+  const fundingSources = useMaster(expense?.projectId, 'fundingSources');
   const statuses = useMaster(expense?.projectId, 'paymentStatuses');
   const vendors = useMaster(expense?.projectId, 'vendors');
   const canEdit = Boolean(project && project.status === 'active' && user && ['admin', 'editor'].includes(project.role));
@@ -47,6 +48,7 @@ export default function ExpenseDetail() {
     ['Quantity', expense.quantity !== undefined ? `${expense.quantity} ${name(units, expense.unitId)}` : '—'],
     ['Rate', expense.rate ? formatCurrency(expense.rate, currency) : '—'],
     ['Paid by', name(methods, expense.paidById)],
+    ['Funding source', name(fundingSources, expense.fundingSourceId)],
     ['Vendor', name(vendors, expense.vendorId)],
   ];
 

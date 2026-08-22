@@ -1,6 +1,12 @@
-import type { CategoryBudget, Expense } from '@/types/domain';
+import type { CategoryBudget, Expense, MasterItem } from '@/types/domain';
 
 export type ExpenseInput = Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>;
+
+export function isDuplicateMasterName(items: Pick<MasterItem, 'id' | 'name'>[], value: string, excludingId?: string) {
+  const normalise = (name: string) => name.trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  const candidate = normalise(value);
+  return Boolean(candidate) && items.some((item) => item.id !== excludingId && normalise(item.name) === candidate);
+}
 
 export function validateExpense(input: Partial<ExpenseInput>) {
   const errors: Record<string, string> = {};
@@ -10,6 +16,7 @@ export function validateExpense(input: Partial<ExpenseInput>) {
   if (!input.categoryId) errors.categoryId = 'Choose a category.';
   if (!input.item?.trim()) errors.item = 'Add an item name.';
   if (!input.paidById) errors.paidById = 'Choose how this was paid.';
+  if (!input.fundingSourceId) errors.fundingSourceId = 'Choose where the money came from.';
   if (!input.paymentStatusId) errors.paymentStatusId = 'Choose a payment status.';
   if (!input.amount || input.amount <= 0) errors.amount = 'Amount must be greater than zero.';
   if (input.quantity !== undefined && input.quantity < 0) errors.quantity = 'Quantity cannot be negative.';

@@ -8,7 +8,7 @@ function applyFilters(items: Expense[], filters: ExpenseFilters) {
   const filtered = items.filter((item) => (!search || [item.item, item.description, item.notes].some((text) => text.toLowerCase().includes(search)))
     && (!filters.categoryId || item.categoryId === filters.categoryId) && (!filters.stageId || item.stageId === filters.stageId)
     && (!filters.vendorId || item.vendorId === filters.vendorId) && (!filters.paymentStatusId || item.paymentStatusId === filters.paymentStatusId)
-    && (!filters.paidById || item.paidById === filters.paidById) && (!filters.costBucket || (item.costBucket ?? 'construction') === filters.costBucket)
+    && (!filters.paidById || item.paidById === filters.paidById) && (!filters.fundingSourceId || item.fundingSourceId === filters.fundingSourceId) && (!filters.costBucket || (item.costBucket ?? 'construction') === filters.costBucket)
     && (!filters.from || item.date >= filters.from) && (!filters.to || item.date <= filters.to));
   return [...filtered].sort((a, b) => {
     if (filters.sort === 'oldest') return a.date.localeCompare(b.date);

@@ -17,7 +17,7 @@ export const projectRepository = {
   archive(userId: string, id: string) { return updateDoc(doc(db, 'projects', id), { status: 'archived', updatedBy: userId, updatedAt: new Date().toISOString() }); },
   reactivate(userId: string, id: string) { return updateDoc(doc(db, 'projects', id), { status: 'active', updatedBy: userId, updatedAt: new Date().toISOString() }); },
   async delete(id: string) {
-    const paths = ['projectMembers', 'projectInvites', 'expenses', 'categories', 'stages', 'vendors', 'units', 'paymentMethods', 'paymentStatuses'];
+    const paths = ['projectMembers', 'projectInvites', 'expenses', 'categories', 'stages', 'vendors', 'units', 'paymentMethods', 'paymentStatuses', 'fundingSources'];
     const snapshots = await Promise.all(paths.map((path) => getDocs(query(collection(db, path), where('projectId', '==', id)))));
     const records = snapshots.flatMap((snapshot) => snapshot.docs.map((item) => item.ref as DocumentReference));
     for (let index = 0; index < records.length; index += 450) {

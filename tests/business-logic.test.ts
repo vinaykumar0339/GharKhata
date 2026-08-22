@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bucketTotal, budgetRows, categoryTotals, expenseTotal } from '../src/lib/analytics.ts';
+import { bucketTotal, budgetRows, categoryTotals, expenseTotal, fundingSourceTotals } from '../src/lib/analytics.ts';
 import { calculateAmount, formatCurrency } from '../src/lib/format.ts';
-import { validateBudget } from '../src/lib/validation.ts';
+import { isDuplicateMasterName, validateBudget } from '../src/lib/validation.ts';
 
 const baseExpense = { createdBy: 'user-a', projectId: 'project-a', date: '2026-08-21', stageId: 'foundation', categoryId: 'cement', item: 'Cement', description: '', paidById: 'cash', paymentStatusId: 'paid', notes: '', createdAt: '', updatedAt: '' };
 
@@ -45,4 +45,26 @@ test('other project costs are tracked outside the construction envelope', () => 
   const budget = { id: 'project-a', projectId: 'project-a', totalBudget: 900000, constructionBudget: 800000, otherBudget: 100000, categoryBudgets: [{ categoryId: 'cement', amount: 800000 }, { categoryId: 'cement', amount: 100000, costBucket: 'other' as const }], updatedAt: '' };
   assert.equal(budgetRows(budget, expenses, categories)[0]?.actual, 700000);
   assert.equal(budgetRows(budget, expenses, categories, 'other')[0]?.actual, 90000);
+});
+
+test('funding source totals preserve unassigned legacy expenses', () => {
+  const expenses = [
+    { id: 'savings-1', ...baseExpense, fundingSourceId: 'savings', amount: 120000 },
+    { id: 'loan-1', ...baseExpense, fundingSourceId: 'home-loan', amount: 250000 },
+    { id: 'legacy-1', ...baseExpense, amount: 10000 },
+  ];
+  const sources = [{ id: 'savings', projectId: 'project-a', name: 'Savings', type: 'fundingSources' as const, createdAt: '', updatedAt: '' }, { id: 'home-loan', projectId: 'project-a', name: 'Home Loan', type: 'fundingSources' as const, createdAt: '', updatedAt: '' }];
+  assert.deepEqual(fundingSourceTotals(expenses, sources), [
+    { id: 'home-loan', name: 'Home Loan', amount: 250000 },
+    { id: 'savings', name: 'Savings', amount: 120000 },
+    { id: 'unassigned', name: 'Unassigned source', amount: 10000 },
+  ]);
+});
+
+test('master values cannot be duplicated by casing or extra whitespace', () => {
+  const items = [{ id: 'savings', name: 'Savings' }, { id: 'loan', name: 'Home Loan' }];
+  assert.equal(isDuplicateMasterName(items, ' savings '), true);
+  assert.equal(isDuplicateMasterName(items, 'HOME   LOAN'), true);
+  assert.equal(isDuplicateMasterName(items, 'Savings', 'savings'), false);
+  assert.equal(isDuplicateMasterName(items, 'Personal Loan'), false);
 });

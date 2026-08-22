@@ -11,6 +11,15 @@ export function categoryTotals(expenses: Expense[], categories: MasterItem[]) {
   })).filter((item) => item.amount > 0).sort((a, b) => b.amount - a.amount);
 }
 
+export function fundingSourceTotals(expenses: Expense[], sources: MasterItem[]) {
+  const sourceIds = new Set(expenses.map((expense) => expense.fundingSourceId ?? 'unassigned'));
+  return [...sourceIds].map((id) => ({
+    id,
+    name: id === 'unassigned' ? 'Unassigned source' : sources.find((source) => source.id === id)?.name ?? 'Removed source',
+    amount: expenses.filter((expense) => (expense.fundingSourceId ?? 'unassigned') === id).reduce((sum, expense) => sum + expense.amount, 0),
+  })).filter((item) => item.amount > 0).sort((a, b) => b.amount - a.amount);
+}
+
 export function stageTotals(expenses: Expense[], stages: MasterItem[]) {
   return stages.map((stage) => ({
     id: stage.id, name: stage.name,
